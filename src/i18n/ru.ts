@@ -127,7 +127,7 @@ export const ru = {
   },
   library: {
     title: 'Библиотека',
-    searchPlaceholder: 'Поиск слов и переводов',
+    searchPlaceholder: 'Слово или перевод',
     select: 'Выбрать',
     cancelSelect: 'Отмена',
     selectAll: 'Выбрать все',

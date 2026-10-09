@@ -8,6 +8,7 @@ const Today = lazy(() => import('@/screens/Today'));
 const Library = lazy(() => import('@/screens/Library'));
 const SessionBuilder = lazy(() => import('@/screens/SessionBuilder'));
 const Stats = lazy(() => import('@/screens/Stats'));
+const WordDetail = lazy(() => import('@/screens/WordDetail'));
 
 export function App() {
   return (
@@ -18,6 +19,7 @@ export function App() {
           <Route element={<AppShell />}>
             <Route index element={<Today />} />
             <Route path="library" element={<Library />} />
+            <Route path="word/:id" element={<WordDetail />} />
             <Route path="train" element={<SessionBuilder />} />
             <Route path="stats" element={<Stats />} />
             <Route path="*" element={<Navigate to="/" replace />} />

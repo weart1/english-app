@@ -66,7 +66,7 @@ export const Screen = forwardRef<HTMLDivElement, ScreenProps>(function Screen(
               {title !== undefined && (
                 <h1
                   className={`min-w-0 flex-1 truncate ${
-                    large ? 'text-large-title font-bold tracking-tight' : 'text-title font-semibold'
+                    large ? 'text-[clamp(1.55rem,7.4vw,1.882rem)] leading-tight font-bold tracking-tight' : 'text-title font-semibold'
                   }`}
                 >
                   {title}

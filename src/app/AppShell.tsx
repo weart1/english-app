@@ -1,10 +1,15 @@
-import { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { LazyMotion, MotionConfig } from 'motion/react';
 import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { UpdatePrompt } from './UpdatePrompt';
 import { Toaster } from '@/components/Toaster';
+import { useEditorStore } from '@/store/ui';
 import { ru } from '@/i18n/ru';
+
+const WordEditorHost = lazy(() => import('@/screens/WordEditor'));
+const loadMotionFeatures = () => import('./motionFeatures').then((m) => m.default);
 
 export function ScreenFallback() {
   return (
@@ -21,18 +26,29 @@ export function ScreenFallback() {
 export function AppShell() {
   const location = useLocation();
   const fullscreen = location.pathname.startsWith('/session');
+  // Mount the editor chunk only once it has been opened.
+  const editorUsed = useEditorStore((s) => s.nonce > 0);
   return (
-    <div className="app-shell relative z-[1] flex flex-col overflow-hidden">
-      <main className="relative flex min-h-0 flex-1 flex-col">
-        <ErrorBoundary level="screen" resetKey={location.pathname}>
-          <Suspense fallback={<ScreenFallback />}>
-            <Outlet />
-          </Suspense>
-        </ErrorBoundary>
-      </main>
-      {!fullscreen && <TabBar />}
-      <Toaster />
-      <UpdatePrompt />
-    </div>
+    <LazyMotion features={loadMotionFeatures} strict>
+      <MotionConfig reducedMotion="user">
+        <div className="app-shell relative z-[1] flex flex-col overflow-hidden">
+          <main className="relative flex min-h-0 flex-1 flex-col">
+            <ErrorBoundary level="screen" resetKey={location.pathname}>
+              <Suspense fallback={<ScreenFallback />}>
+                <Outlet />
+              </Suspense>
+            </ErrorBoundary>
+          </main>
+          {!fullscreen && <TabBar />}
+          {editorUsed && (
+            <Suspense fallback={null}>
+              <WordEditorHost />
+            </Suspense>
+          )}
+          <Toaster />
+          <UpdatePrompt />
+        </div>
+      </MotionConfig>
+    </LazyMotion>
   );
 }

@@ -49,3 +49,11 @@ export function useActiveSession(): PersistedSession | null | undefined {
 export function useWordCount(): number | undefined {
   return useLiveQuery(() => db.words.count(), []);
 }
+
+export function useWordLogs(wordId: string | undefined, limit = 15) {
+  return useLiveQuery(async () => {
+    if (!wordId) return [];
+    const logs = await db.logs.where('wordId').equals(wordId).toArray();
+    return logs.sort((a, b) => (a.reviewedAt < b.reviewedAt ? 1 : -1)).slice(0, limit);
+  }, [wordId, limit]);
+}
