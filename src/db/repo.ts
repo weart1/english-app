@@ -355,3 +355,94 @@ export async function clearAllData(): Promise<void> {
     ]);
   });
 }
+
+/* ---------- Bulk import ---------- */
+
+export type DuplicateMode = 'skip' | 'update' | 'add';
+
+export interface ImportInputRow {
+  term: string;
+  translations: string[];
+  transcription?: string;
+  examples: string[];
+  tagNames: string[];
+  status: 'new' | 'duplicate' | 'duplicate-in-file' | 'error';
+  existingId?: string;
+}
+
+export interface ImportResult {
+  added: number;
+  updated: number;
+  skipped: number;
+}
+
+/**
+ * Imports previewed rows in ONE transaction: tags, words and cards. If anything
+ * fails, nothing is written.
+ */
+export async function importWords(
+  rows: readonly ImportInputRow[],
+  duplicateMode: DuplicateMode,
+  now = new Date(),
+): Promise<ImportResult> {
+  const iso = now.toISOString();
+  let wasEmpty = false;
+  const result = await db.transaction('rw', db.words, db.cards, db.tags, async () => {
+    wasEmpty = (await db.words.count()) === 0;
+    const tags = await db.tags.toArray();
+    const tagByName = new Map(tags.map((t) => [t.name.toLowerCase(), t]));
+    const tagIdsFor = async (names: string[]): Promise<string[]> => {
+      const ids: string[] = [];
+      for (const raw of names) {
+        const name = cleanLine(raw);
+        if (!name) continue;
+        let tag = tagByName.get(name.toLowerCase());
+        if (!tag) {
+          tag = { id: uuid(), name, color: TAG_COLORS[tagByName.size % TAG_COLORS.length] ?? TAG_COLORS[0], createdAt: iso };
+          await db.tags.add(tag);
+          tagByName.set(name.toLowerCase(), tag);
+        }
+        ids.push(tag.id);
+      }
+      return Array.from(new Set(ids));
+    };
+
+    const out: ImportResult = { added: 0, updated: 0, skipped: 0 };
+    for (const row of rows) {
+      if (row.status === 'error' || row.status === 'duplicate-in-file') {
+        out.skipped++;
+        continue;
+      }
+      const isDup = row.status === 'duplicate' && !!row.existingId;
+      if (isDup && duplicateMode === 'skip') {
+        out.skipped++;
+        continue;
+      }
+      const tagIds = await tagIdsFor(row.tagNames);
+      if (isDup && duplicateMode === 'update') {
+        const existing = await db.words.get(row.existingId as string);
+        if (existing) {
+          const clean = sanitizeWordInput({
+            term: existing.term,
+            translations: [...existing.translations, ...row.translations],
+            transcription: row.transcription || existing.transcription,
+            examples: [...existing.examples, ...row.examples],
+            note: existing.note,
+            tagIds: [...existing.tagIds, ...tagIds],
+          });
+          await db.words.put({ ...existing, ...clean, updatedAt: iso });
+          out.updated++;
+          continue;
+        }
+      }
+      const clean = sanitizeWordInput({ ...row, tagIds });
+      const word: Word = { id: uuid(), ...clean, createdAt: iso, updatedAt: iso, archived: false };
+      await db.words.add(word);
+      await db.cards.bulkAdd(DIRECTIONS.map((d) => makeCard(word.id, d, now)));
+      out.added++;
+    }
+    return out;
+  });
+  if (wasEmpty && result.added > 0) void requestPersistentStorage();
+  return result;
+}

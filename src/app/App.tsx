@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from './AppShell';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Background } from '@/components/Background';
+import { DbGate } from './DbGate';
 
 const Today = lazy(() => import('@/screens/Today'));
 const Library = lazy(() => import('@/screens/Library'));
@@ -10,26 +11,34 @@ const SessionBuilder = lazy(() => import('@/screens/SessionBuilder'));
 const Stats = lazy(() => import('@/screens/Stats'));
 const WordDetail = lazy(() => import('@/screens/WordDetail'));
 const Session = lazy(() => import('@/screens/Session'));
+const Settings = lazy(() => import('@/screens/Settings'));
+const Import = lazy(() => import('@/screens/Import'));
+const InstallGuide = lazy(() => import('@/screens/InstallGuide'));
 const SessionSummary = lazy(() => import('@/screens/SessionSummary'));
 
 export function App() {
   return (
     <ErrorBoundary level="root">
       <Background />
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route index element={<Today />} />
-            <Route path="library" element={<Library />} />
-            <Route path="word/:id" element={<WordDetail />} />
-            <Route path="train" element={<SessionBuilder />} />
-            <Route path="stats" element={<Stats />} />
-            <Route path="session" element={<Session />} />
-            <Route path="session/summary" element={<SessionSummary />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <DbGate>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<Today />} />
+              <Route path="library" element={<Library />} />
+              <Route path="word/:id" element={<WordDetail />} />
+              <Route path="train" element={<SessionBuilder />} />
+              <Route path="stats" element={<Stats />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="import" element={<Import />} />
+              <Route path="install" element={<InstallGuide />} />
+              <Route path="session" element={<Session />} />
+              <Route path="session/summary" element={<SessionSummary />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </DbGate>
     </ErrorBoundary>
   );
 }
