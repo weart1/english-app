@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
-import { AnimatePresence, m } from 'motion/react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { Button, type ButtonVariant } from './Button';
 import { ru } from '@/i18n/ru';
 
@@ -48,46 +48,48 @@ export function Dialog({
   }, [open, onCancel]);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <div className="fixed inset-0 z-[55] flex items-center justify-center px-6" role="presentation">
-          <m.div
-            className="absolute inset-0 bg-[rgba(11,27,58,0.32)]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onCancel}
-            aria-hidden="true"
-          />
-          <m.div
-            ref={ref}
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            tabIndex={-1}
-            className="glass relative w-full max-w-sm rounded-[26px] p-6 outline-none"
-            style={{ background: 'rgba(255,255,255,0.9)' }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.18 }}
-          >
-            <h2 id={titleId} className="text-title font-semibold">
-              {title}
-            </h2>
-            {body && <p className="text-muted-glass mt-2">{body}</p>}
-            {children && <div className="mt-4">{children}</div>}
-            <div className="mt-6 flex gap-3">
-              <Button variant="secondary" block onClick={onCancel}>
-                {cancelLabel}
-              </Button>
-              <Button variant={confirmVariant} block onClick={onConfirm} disabled={confirmDisabled}>
-                {confirmLabel}
-              </Button>
-            </div>
-          </m.div>
-        </div>
-      )}
-    </AnimatePresence>
+    <MotionConfig reducedMotion="user">
+      <AnimatePresence>
+        {open && (
+          <div className="fixed inset-0 z-[55] flex items-center justify-center px-6" role="presentation">
+            <motion.div
+              className="absolute inset-0 bg-[rgba(11,27,58,0.32)]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onCancel}
+              aria-hidden="true"
+            />
+            <motion.div
+              ref={ref}
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              tabIndex={-1}
+              className="glass relative w-full max-w-sm rounded-[26px] p-6 outline-none"
+              style={{ background: 'rgba(255,255,255,0.9)' }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.18 }}
+            >
+              <h2 id={titleId} className="text-title font-semibold">
+                {title}
+              </h2>
+              {body && <p className="text-muted-glass mt-2">{body}</p>}
+              {children && <div className="mt-4">{children}</div>}
+              <div className="mt-6 flex gap-3">
+                <Button variant="secondary" block onClick={onCancel}>
+                  {cancelLabel}
+                </Button>
+                <Button variant={confirmVariant} block onClick={onConfirm} disabled={confirmDisabled}>
+                  {confirmLabel}
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </MotionConfig>
   );
 }

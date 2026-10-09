@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
-import { ChevronRight, DatabaseBackup, FileDown, FileUp, HardDrive, Pencil, Smartphone, Trash2, Upload, Volume2 } from 'lucide-react';
+import {
+  ChevronRight,
+  DatabaseBackup,
+  FileDown,
+  FileUp,
+  HardDrive,
+  Pencil,
+  Smartphone,
+  Trash2,
+  Upload,
+  Volume2,
+} from 'lucide-react';
 import { Screen } from '@/components/Screen';
 import { Button, IconButton } from '@/components/Button';
 import { Stepper } from '@/components/Stepper';
@@ -50,10 +61,22 @@ export default function Settings() {
       <div className="flex flex-col gap-4 pt-2">
         <Card title={ru.settings.study}>
           <Row label={ru.settings.dailyGoal}>
-            <Stepper value={settings.dailyGoal} min={1} max={200} onChange={(v) => save({ dailyGoal: v })} label={ru.settings.dailyGoal} />
+            <Stepper
+              value={settings.dailyGoal}
+              min={1}
+              max={200}
+              onChange={(v) => save({ dailyGoal: v })}
+              label={ru.settings.dailyGoal}
+            />
           </Row>
           <Row label={ru.settings.newPerDay}>
-            <Stepper value={settings.newWordsPerDay} min={0} max={200} onChange={(v) => save({ newWordsPerDay: v })} label={ru.settings.newPerDay} />
+            <Stepper
+              value={settings.newWordsPerDay}
+              min={0}
+              max={200}
+              onChange={(v) => save({ newWordsPerDay: v })}
+              label={ru.settings.newPerDay}
+            />
           </Row>
           <Row label={ru.settings.dayStart} hint={ru.settings.dayStartHint} htmlFor="day-start">
             <select
@@ -72,69 +95,97 @@ export default function Settings() {
         </Card>
 
         <Card title={ru.settings.audio}>
-          {speech.supported ? (
-            <>
-              <div className="py-2">
-                <label htmlFor="voice" className="mb-1.5 block font-medium">
-                  {ru.settings.voice}
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    id="voice"
-                    value={settings.ttsVoiceURI ?? ''}
-                    onChange={(e) => save({ ttsVoiceURI: e.target.value || undefined })}
-                    className="min-h-11 min-w-0 flex-1 rounded-[12px] border border-[#dfe6f3] bg-white px-3"
-                  >
-                    <option value="">{ru.settings.voiceDefault}</option>
-                    {speech.voices.map((v) => (
-                      <option key={v.voiceURI} value={v.voiceURI}>
-                        {v.name} ({v.lang})
-                      </option>
-                    ))}
-                  </select>
-                  <Button variant="soft" icon={<Volume2 aria-hidden="true" className="size-4" />} onClick={() => speech.speak(ru.settings.voiceTestPhrase)}>
-                    {ru.settings.voiceTest}
-                  </Button>
-                </div>
+          {/* Controls always render (disabled without TTS) so the layout never shifts when voices finish loading. */}
+          <fieldset disabled={!speech.supported} className="disabled:opacity-60">
+            <div className="py-2">
+              <label htmlFor="voice" className="mb-1.5 block font-medium">
+                {ru.settings.voice}
+              </label>
+              <div className="flex gap-2">
+                <select
+                  id="voice"
+                  value={settings.ttsVoiceURI ?? ''}
+                  onChange={(e) => save({ ttsVoiceURI: e.target.value || undefined })}
+                  className="min-h-11 min-w-0 flex-1 rounded-[12px] border border-[#dfe6f3] bg-white px-3"
+                >
+                  <option value="">{ru.settings.voiceDefault}</option>
+                  {speech.voices.map((v) => (
+                    <option key={v.voiceURI} value={v.voiceURI}>
+                      {v.name} ({v.lang})
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  variant="soft"
+                  icon={<Volume2 aria-hidden="true" className="size-4" />}
+                  onClick={() => speech.speak(ru.settings.voiceTestPhrase)}
+                >
+                  {ru.settings.voiceTest}
+                </Button>
               </div>
-              <div className="py-2">
-                <label htmlFor="rate" className="mb-1 flex items-center justify-between font-medium">
-                  {ru.settings.rate}
-                  <span className="text-muted tabular-nums">{settings.ttsRate.toFixed(2)}×</span>
-                </label>
-                <input
-                  id="rate"
-                  type="range"
-                  min={0.5}
-                  max={1.5}
-                  step={0.05}
-                  value={settings.ttsRate}
-                  onChange={(e) => save({ ttsRate: Number(e.target.value) })}
-                  className="accent-primary-500 h-11 w-full"
-                />
-              </div>
-              <Toggle checked={settings.autoPlayAudio} onChange={(v) => save({ autoPlayAudio: v })} label={ru.settings.autoPlay} />
-            </>
-          ) : (
-            <p className="text-muted">{ru.settings.ttsUnavailable}</p>
-          )}
+            </div>
+            <div className="py-2">
+              <label htmlFor="rate" className="mb-1 flex items-center justify-between font-medium">
+                {ru.settings.rate}
+                <span className="text-muted tabular-nums">{settings.ttsRate.toFixed(2)}×</span>
+              </label>
+              <input
+                id="rate"
+                type="range"
+                min={0.5}
+                max={1.5}
+                step={0.05}
+                value={settings.ttsRate}
+                onChange={(e) => save({ ttsRate: Number(e.target.value) })}
+                className="accent-primary-500 h-11 w-full"
+              />
+            </div>
+            <Toggle
+              checked={settings.autoPlayAudio}
+              onChange={(v) => save({ autoPlayAudio: v })}
+              label={ru.settings.autoPlay}
+              disabled={!speech.supported}
+            />
+          </fieldset>
+          <p className="text-muted min-h-[1.4em] text-[0.9rem]" aria-live="polite">
+            {speech.supported ? '' : ru.settings.ttsUnavailable}
+          </p>
         </Card>
 
         <TagsCard tags={tags ?? []} />
 
         <Card title={ru.settings.data}>
           <p className="text-muted mb-3 text-[0.9rem]">
-            {settings.lastBackupAt ? ru.settings.lastBackup(formatDateTime(settings.lastBackupAt)) : ru.settings.noBackup}
+            {settings.lastBackupAt
+              ? ru.settings.lastBackup(formatDateTime(settings.lastBackupAt))
+              : ru.settings.noBackup}
           </p>
           <div className="flex flex-col gap-2">
-            <Button variant="primary" block disabled={!!busy} onClick={() => void runExport('json')} icon={<DatabaseBackup aria-hidden="true" className="size-5" />}>
+            <Button
+              variant="primary"
+              block
+              disabled={!!busy}
+              onClick={() => void runExport('json')}
+              icon={<DatabaseBackup aria-hidden="true" className="size-5" />}
+            >
               {ru.settings.exportJson}
             </Button>
-            <Button variant="secondary" block disabled={!!busy || !wordCount} onClick={() => void runExport('csv')} icon={<FileDown aria-hidden="true" className="size-5" />}>
+            <Button
+              variant="secondary"
+              block
+              disabled={!!busy || !wordCount}
+              onClick={() => void runExport('csv')}
+              icon={<FileDown aria-hidden="true" className="size-5" />}
+            >
               {ru.settings.exportCsv}
             </Button>
             <RestoreButton />
-            <Button variant="ghost" block onClick={() => navigate('/import')} icon={<FileUp aria-hidden="true" className="size-5" />}>
+            <Button
+              variant="ghost"
+              block
+              onClick={() => navigate('/import')}
+              icon={<FileUp aria-hidden="true" className="size-5" />}
+            >
               {ru.settings.importWords}
             </Button>
           </div>
@@ -145,12 +196,20 @@ export default function Settings() {
             <HardDrive aria-hidden="true" className="text-primary-600 mt-0.5 size-5 shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="font-medium">{ru.settings.persisted(storage.persisted)}</p>
-              {storage.estimate && storage.estimate.quota > 0 && (
-                <p className="text-muted text-[0.9rem]">{ru.settings.usage(formatBytes(storage.estimate.usage), formatBytes(storage.estimate.quota))}</p>
-              )}
+              <p className="text-muted min-h-[1.4em] text-[0.9rem]">
+                {storage.estimate && storage.estimate.quota > 0
+                  ? ru.settings.usage(formatBytes(storage.estimate.usage), formatBytes(storage.estimate.quota))
+                  : ''}
+              </p>
               <p className="text-muted mt-1 text-[0.9rem]">{ru.settings.persistHint}</p>
-              {storage.persisted === false && (
-                <Button size="sm" variant="soft" className="mt-2" onClick={() => void storage.request()}>
+              {storage.persisted !== true && (
+                <Button
+                  size="sm"
+                  variant="soft"
+                  className="mt-2"
+                  disabled={storage.persisted === null}
+                  onClick={() => void storage.request()}
+                >
                   {ru.settings.persistRequest}
                 </Button>
               )}
@@ -159,7 +218,11 @@ export default function Settings() {
         </Card>
 
         <Card title={ru.settings.about}>
-          <button type="button" onClick={() => navigate('/install')} className="flex min-h-12 w-full items-center gap-3 text-left">
+          <button
+            type="button"
+            onClick={() => navigate('/install')}
+            className="flex min-h-12 w-full items-center gap-3 text-left"
+          >
             <Smartphone aria-hidden="true" className="text-primary-600 size-5" />
             <span className="flex-1 font-medium">{ru.settings.installGuide}</span>
             <ChevronRight aria-hidden="true" className="text-muted size-5" />
@@ -182,7 +245,17 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Row({ label, hint, htmlFor, children }: { label: string; hint?: string; htmlFor?: string; children: ReactNode }) {
+function Row({
+  label,
+  hint,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  htmlFor?: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex min-h-14 items-center gap-3 py-1.5">
       <div className="min-w-0 flex-1">
@@ -234,7 +307,11 @@ function TagsCard({ tags }: { tags: Tag[] }) {
               >
                 <Pencil aria-hidden="true" className="size-4" />
               </IconButton>
-              <IconButton label={`${ru.settings.tagDelete}: ${t.name}`} className="text-danger-600" onClick={() => setDeleting(t)}>
+              <IconButton
+                label={`${ru.settings.tagDelete}: ${t.name}`}
+                className="text-danger-600"
+                onClick={() => setDeleting(t)}
+              >
                 <Trash2 aria-hidden="true" className="size-4" />
               </IconButton>
             </li>
@@ -347,7 +424,12 @@ function RestoreButton() {
           e.target.value = '';
         }}
       />
-      <Button variant="secondary" block onClick={() => fileRef.current?.click()} icon={<Upload aria-hidden="true" className="size-5" />}>
+      <Button
+        variant="secondary"
+        block
+        onClick={() => fileRef.current?.click()}
+        icon={<Upload aria-hidden="true" className="size-5" />}
+      >
         {ru.settings.importBackup}
       </Button>
       {error && (
@@ -359,11 +441,19 @@ function RestoreButton() {
         {backup && (
           <div className="flex flex-col gap-3 pb-2">
             <p>{ru.restore.summary(backup.words.length, backup.logs.length, formatDate(backup.exportedAt))}</p>
-            <button type="button" onClick={() => void choose('merge')} className="solid-card flex flex-col items-start p-4 text-left">
+            <button
+              type="button"
+              onClick={() => void choose('merge')}
+              className="solid-card flex flex-col items-start p-4 text-left"
+            >
               <span className="font-semibold">{ru.restore.merge}</span>
               <span className="text-muted text-[0.9rem]">{ru.restore.mergeHint}</span>
             </button>
-            <button type="button" onClick={() => void choose('replace')} className="solid-card flex flex-col items-start p-4 text-left">
+            <button
+              type="button"
+              onClick={() => void choose('replace')}
+              className="solid-card flex flex-col items-start p-4 text-left"
+            >
               <span className="text-danger-600 font-semibold">{ru.restore.replace}</span>
               <span className="text-muted text-[0.9rem]">{ru.restore.replaceHint}</span>
             </button>
@@ -402,7 +492,13 @@ function DangerZone({ onDone }: { onDone: () => void }) {
   return (
     <section className="solid-card p-4">
       <h2 className="text-danger-600 text-caption mb-2 font-semibold tracking-wide uppercase">{ru.settings.danger}</h2>
-      <Button variant="secondary" block className="text-danger-600" onClick={() => setStep(1)} icon={<Trash2 aria-hidden="true" className="size-5" />}>
+      <Button
+        variant="secondary"
+        block
+        className="text-danger-600"
+        onClick={() => setStep(1)}
+        icon={<Trash2 aria-hidden="true" className="size-5" />}
+      >
         {ru.settings.deleteAll}
       </Button>
       <Dialog

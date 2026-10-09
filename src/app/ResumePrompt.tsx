@@ -11,7 +11,7 @@ import { ru } from '@/i18n/ru';
  * If iOS killed the app mid-session, offer to continue it on the next launch.
  * Shown at most once per launch and never on the session screens themselves.
  */
-export function ResumePrompt() {
+export default function ResumePrompt() {
   const location = useLocation();
   const navigate = useNavigate();
   const active = useActiveSession();

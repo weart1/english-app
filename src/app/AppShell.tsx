@@ -1,16 +1,28 @@
 import { lazy, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import { LazyMotion, MotionConfig } from 'motion/react';
 import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { UpdatePrompt } from './UpdatePrompt';
-import { ResumePrompt } from './ResumePrompt';
 import { Toaster } from '@/components/Toaster';
 import { useEditorStore } from '@/store/ui';
+import { useSessionUi } from '@/store/session';
+import { useActiveSession } from '@/db/queries';
 import { ru } from '@/i18n/ru';
 
 const WordEditorHost = lazy(() => import('@/screens/WordEditor'));
-const loadMotionFeatures = () => import('./motionFeatures').then((m) => m.default);
+const ResumePrompt = lazy(() => import('./ResumePrompt'));
+
+/** Loads the resume dialog (and the animation library behind it) only when there is a session to resume. */
+function ResumeGate() {
+  const active = useActiveSession();
+  const prompted = useSessionUi((s) => s.resumePrompted);
+  if (!active || prompted) return null;
+  return (
+    <Suspense fallback={null}>
+      <ResumePrompt />
+    </Suspense>
+  );
+}
 
 export function ScreenFallback() {
   return (
@@ -30,27 +42,23 @@ export function AppShell() {
   // Mount the editor chunk only once it has been opened.
   const editorUsed = useEditorStore((s) => s.nonce > 0);
   return (
-    <LazyMotion features={loadMotionFeatures} strict>
-      <MotionConfig reducedMotion="user">
-        <div className="app-shell relative z-[1] flex flex-col overflow-hidden">
-          <main className="relative flex min-h-0 flex-1 flex-col">
-            <ErrorBoundary level="screen" resetKey={location.pathname}>
-              <Suspense fallback={<ScreenFallback />}>
-                <Outlet />
-              </Suspense>
-            </ErrorBoundary>
-          </main>
-          {!fullscreen && <TabBar />}
-          {editorUsed && (
-            <Suspense fallback={null}>
-              <WordEditorHost />
-            </Suspense>
-          )}
-          <Toaster />
-          <UpdatePrompt />
-          <ResumePrompt />
-        </div>
-      </MotionConfig>
-    </LazyMotion>
+    <div className="app-shell relative z-[1] flex flex-col overflow-hidden">
+      <main className="relative flex min-h-0 flex-1 flex-col">
+        <ErrorBoundary level="screen" resetKey={location.pathname}>
+          <Suspense fallback={<ScreenFallback />}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
+      </main>
+      {!fullscreen && <TabBar />}
+      {editorUsed && (
+        <Suspense fallback={null}>
+          <WordEditorHost />
+        </Suspense>
+      )}
+      <Toaster />
+      <UpdatePrompt />
+      <ResumeGate />
+    </div>
   );
 }

@@ -14,7 +14,6 @@ import type { SessionConfig, SessionPreset } from '@/db/types';
 import { endOfStudyDay, startOfStudyDay } from '@/lib/dates';
 import { activeDayKeys, computeStreak, wordsReviewedToday } from '@/lib/stats';
 import { errorMessage } from '@/lib/errors';
-import { startSession } from '@/app/sessionActions';
 import { useNow } from '@/hooks/useNow';
 import { useEditorStore } from '@/store/ui';
 import { toast } from '@/store/toast';
@@ -87,6 +86,8 @@ export default function Today() {
     if (busy) return;
     setBusy(true);
     try {
+      // Loaded on tap: keeps the session planner out of the first-load bundle.
+      const { startSession } = await import('@/app/sessionActions');
       const res = await startSession(config);
       if (res.ok) navigate('/session');
       else toast.error(res.reason);

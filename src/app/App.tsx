@@ -1,20 +1,11 @@
-import { lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from './AppShell';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Background } from '@/components/Background';
 import { DbGate } from './DbGate';
-
-const Today = lazy(() => import('@/screens/Today'));
-const Library = lazy(() => import('@/screens/Library'));
-const SessionBuilder = lazy(() => import('@/screens/SessionBuilder'));
-const Stats = lazy(() => import('@/screens/Stats'));
-const WordDetail = lazy(() => import('@/screens/WordDetail'));
-const Session = lazy(() => import('@/screens/Session'));
-const Settings = lazy(() => import('@/screens/Settings'));
-const Import = lazy(() => import('@/screens/Import'));
-const InstallGuide = lazy(() => import('@/screens/InstallGuide'));
-const SessionSummary = lazy(() => import('@/screens/SessionSummary'));
+import { Screens } from './routes';
+// The start screen is bundled eagerly: it saves a network round trip on first load.
+import Today from '@/screens/Today';
 
 export function App() {
   return (
@@ -25,15 +16,15 @@ export function App() {
           <Routes>
             <Route element={<AppShell />}>
               <Route index element={<Today />} />
-              <Route path="library" element={<Library />} />
-              <Route path="word/:id" element={<WordDetail />} />
-              <Route path="train" element={<SessionBuilder />} />
-              <Route path="stats" element={<Stats />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="import" element={<Import />} />
-              <Route path="install" element={<InstallGuide />} />
-              <Route path="session" element={<Session />} />
-              <Route path="session/summary" element={<SessionSummary />} />
+              <Route path="library" element={<Screens.Library />} />
+              <Route path="word/:id" element={<Screens.WordDetail />} />
+              <Route path="train" element={<Screens.SessionBuilder />} />
+              <Route path="stats" element={<Screens.Stats />} />
+              <Route path="settings" element={<Screens.Settings />} />
+              <Route path="import" element={<Screens.Import />} />
+              <Route path="install" element={<Screens.InstallGuide />} />
+              <Route path="session" element={<Screens.Session />} />
+              <Route path="session/summary" element={<Screens.SessionSummary />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

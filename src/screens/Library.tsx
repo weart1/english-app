@@ -291,7 +291,8 @@ export default function Library() {
       <LibraryList
         title={ru.library.title}
         actions={actions}
-        header={libraryEmpty ? undefined : header}
+        // Shown only once we know the library has words, so nothing shifts after loading.
+        header={loading || libraryEmpty ? undefined : header}
         overlay={overlay}
         loading={loading}
         entriesEmpty={libraryEmpty}
@@ -478,9 +479,9 @@ function LibraryList(p: LibraryListProps) {
   return (
     <Screen ref={scrollRef} title={p.title} actions={p.actions} headerExtra={p.header} overlay={p.overlay} alwaysGlass={!!p.header}>
       {p.loading ? (
-        <p className="text-muted py-10 text-center" role="status">
+        <span className="sr-only" role="status">
           {ru.common.loading}
-        </p>
+        </span>
       ) : p.visible.length === 0 ? (
         p.emptyContent
       ) : (

@@ -5,7 +5,7 @@
   --blob-blue: #8db6ff;
   --blob-yellow: #ffe08a;
 
-  --primary-500: #2f6bff;
+  --primary-500: #2d68fa; /* spec #2F6BFF is 4.499:1 with white text; nudged to 4.70:1 for AA */
   --primary-600: #1f56e0;
   --primary-100: #e3ecff;
   --primary-50: #f1f5ff;
