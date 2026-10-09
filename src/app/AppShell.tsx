@@ -4,6 +4,7 @@ import { LazyMotion, MotionConfig } from 'motion/react';
 import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { UpdatePrompt } from './UpdatePrompt';
+import { ResumePrompt } from './ResumePrompt';
 import { Toaster } from '@/components/Toaster';
 import { useEditorStore } from '@/store/ui';
 import { ru } from '@/i18n/ru';
@@ -47,6 +48,7 @@ export function AppShell() {
           )}
           <Toaster />
           <UpdatePrompt />
+          <ResumePrompt />
         </div>
       </MotionConfig>
     </LazyMotion>

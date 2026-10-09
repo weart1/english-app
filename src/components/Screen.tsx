@@ -50,7 +50,7 @@ export const Screen = forwardRef<HTMLDivElement, ScreenProps>(function Screen(
           className={`sticky top-0 z-20 transition-[background-color,box-shadow,border-color] duration-200 ${
             glass ? 'glass rounded-none rounded-b-[22px] border-t-0' : 'border border-transparent'
           }`}
-          style={{ paddingTop: 'var(--safe-top)' }}
+          style={{ paddingTop: 'var(--safe-top)', ...(glass ? { background: 'rgba(255,255,255,0.72)' } : {}) }}
         >
           <div className="px-safe mx-auto max-w-2xl">
             <div className={`flex items-center gap-2 ${large ? 'min-h-14 pt-2' : 'min-h-13'}`}>

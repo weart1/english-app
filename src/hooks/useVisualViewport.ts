@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 export interface ViewportState {
   /** Visible height (shrinks when the iOS keyboard is open). */
   height: number;
+  /** How far iOS has scrolled the visual viewport down inside the layout viewport. */
+  offsetTop: number;
   /** Pixels the keyboard covers at the bottom of the layout viewport. */
   keyboard: number;
 }
@@ -10,9 +12,9 @@ export interface ViewportState {
 function read(): ViewportState {
   const vv = typeof window !== 'undefined' ? window.visualViewport : null;
   const layoutH = typeof window !== 'undefined' ? window.innerHeight : 800;
-  if (!vv) return { height: layoutH, keyboard: 0 };
+  if (!vv) return { height: layoutH, offsetTop: 0, keyboard: 0 };
   const keyboard = Math.max(0, Math.round(layoutH - vv.height - vv.offsetTop));
-  return { height: Math.round(vv.height), keyboard };
+  return { height: Math.round(vv.height), offsetTop: Math.round(vv.offsetTop), keyboard };
 }
 
 /**
@@ -30,7 +32,9 @@ export function useVisualViewport(enabled = true): ViewportState {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const next = read();
-        setState((prev) => (prev.height === next.height && prev.keyboard === next.keyboard ? prev : next));
+        setState((prev) =>
+          prev.height === next.height && prev.keyboard === next.keyboard && prev.offsetTop === next.offsetTop ? prev : next,
+        );
       });
     };
     update();

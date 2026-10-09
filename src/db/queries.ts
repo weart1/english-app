@@ -57,3 +57,17 @@ export function useWordLogs(wordId: string | undefined, limit = 15) {
     return logs.sort((a, b) => (a.reviewedAt < b.reviewedAt ? 1 : -1)).slice(0, limit);
   }, [wordId, limit]);
 }
+
+/** All review timestamps (index keys only — cheap even for large histories). */
+export function useReviewDates(): string[] | undefined {
+  return useLiveQuery(async () => (await db.logs.orderBy('reviewedAt').keys()) as string[], []);
+}
+
+/** Logs since an ISO timestamp (e.g. start of the study day). */
+export function useLogsSince(sinceIso: string) {
+  return useLiveQuery(() => db.logs.where('reviewedAt').aboveOrEqual(sinceIso).toArray(), [sinceIso]);
+}
+
+export function useLastSession(): PersistedSession | null | undefined {
+  return useLiveQuery(async () => (await db.sessions.get('last')) ?? null, []);
+}
