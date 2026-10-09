@@ -141,7 +141,8 @@ export async function createBackup(now = new Date()): Promise<Backup> {
       tags: tags.sort(byId),
       logs: logs.sort(byId),
       presets: presets.sort(byId),
-      settings: settings ?? null,
+      // Always export the effective settings so a restore reproduces them exactly.
+      settings: { ...DEFAULT_SETTINGS, ...settings, id: 'settings' },
     };
   });
 }
