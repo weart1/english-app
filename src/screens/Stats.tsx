@@ -152,7 +152,7 @@ function AccuracyFigure({ label, acc }: { label: string; acc: Accuracy | null })
     <div className="rounded-[16px] bg-[#f5f8fe] p-3">
       <p className="text-muted text-caption">{label}</p>
       <p className="mt-0.5 text-[1.6rem] leading-tight font-semibold">{pct === null ? '—' : `${pct}%`}</p>
-      <p className="text-muted text-caption">{acc && acc.total > 0 ? `${acc.correct} из ${acc.total}` : ru.stats.noAnswers}</p>
+      <p className="text-muted text-caption">{acc && acc.total > 0 ? ru.common.of(acc.correct, acc.total) : ru.stats.noAnswers}</p>
     </div>
   );
 }

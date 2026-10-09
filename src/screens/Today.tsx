@@ -27,8 +27,6 @@ function greeting(now: Date): string {
   return ru.today.greetingEvening;
 }
 
-const WEEKDAYS = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
-const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 
 export default function Today() {
   const navigate = useNavigate();
@@ -129,7 +127,7 @@ export default function Today() {
     });
 
   const title = greeting(now);
-  const subtitle = `${WEEKDAYS[now.getDay()]}, ${now.getDate()} ${MONTHS_GEN[now.getMonth()]}`;
+  const subtitle = `${ru.dates.weekdaysFull[now.getDay()]}, ${now.getDate()} ${ru.dates.monthsGenitive[now.getMonth()]}`;
 
   const gear = (
     <IconButton label={ru.today.settings} onClick={() => navigate('/settings')}>
@@ -161,7 +159,7 @@ export default function Today() {
         <section className="solid-card flex items-center gap-5 p-5" aria-label={ru.today.goalAria(goalDone, settings.dailyGoal)}>
           <ProgressRing value={goalDone / Math.max(1, settings.dailyGoal)} size={112} stroke={12} label={ru.today.goalAria(goalDone, settings.dailyGoal)}>
             <span className="text-[1.45rem] leading-none font-bold tabular-nums">{goalDone}</span>
-            <span className="text-muted text-caption mt-0.5">из {settings.dailyGoal}</span>
+            <span className="text-muted text-caption mt-0.5">{ru.common.ofShort(settings.dailyGoal)}</span>
           </ProgressRing>
           <div className="min-w-0 flex-1">
             <p className="font-semibold">{ru.today.goal(goalDone, settings.dailyGoal)}</p>

@@ -27,7 +27,7 @@ export function Cloze(props: CardModeProps) {
       {filled ? (
         <mark className="text-primary-600 rounded-md bg-primary-100 px-1 font-semibold">{match.answer}</mark>
       ) : (
-        <span aria-label="пропуск" className="border-primary-500 mx-0.5 inline-block min-w-[4.5rem] border-b-2 align-baseline">
+        <span aria-label={ru.session.blank} className="border-primary-500 mx-0.5 inline-block min-w-[4.5rem] border-b-2 align-baseline">
           &nbsp;
         </span>
       )}

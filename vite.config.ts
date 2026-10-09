@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -14,7 +14,20 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
   version: string;
 };
 
+// Hosts allowed when testing on a phone through an HTTPS tunnel (see README).
+const TUNNEL_HOSTS = ['.trycloudflare.com', '.ngrok-free.app', '.ngrok.io', '.loca.lt'];
+
+// Optional local HTTPS for phone testing: HTTPS_CERT=./ip.pem HTTPS_KEY=./ip-key.pem (made with mkcert).
+const certFile = process.env.HTTPS_CERT;
+const keyFile = process.env.HTTPS_KEY;
+const https =
+  certFile && keyFile && existsSync(certFile) && existsSync(keyFile)
+    ? { cert: readFileSync(certFile), key: readFileSync(keyFile) }
+    : undefined;
+
 export default defineConfig(({ mode }) => ({
+  server: { allowedHosts: TUNNEL_HOSTS, https },
+  preview: { allowedHosts: TUNNEL_HOSTS, https },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },

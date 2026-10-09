@@ -1,4 +1,5 @@
 /** Persistent-storage helpers (navigator.storage), safe on every engine. */
+import { ru } from '@/i18n/ru';
 
 export async function isStoragePersisted(): Promise<boolean | null> {
   try {
@@ -31,8 +32,8 @@ export async function storageEstimate(): Promise<{ usage: number; quota: number 
 }
 
 export function formatBytes(n: number): string {
-  if (n < 1024) return `${n} Б`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} КБ`;
-  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} МБ`;
-  return `${(n / 1024 / 1024 / 1024).toFixed(1)} ГБ`;
+  if (n < 1024) return ru.units.bytes(String(n));
+  if (n < 1024 * 1024) return ru.units.kb((n / 1024).toFixed(0));
+  if (n < 1024 * 1024 * 1024) return ru.units.mb((n / 1024 / 1024).toFixed(1));
+  return ru.units.gb((n / 1024 / 1024 / 1024).toFixed(1));
 }

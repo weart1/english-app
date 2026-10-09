@@ -42,8 +42,8 @@ export function formatDue(iso: string, now: Date, dayStartsAtHour: number): stri
   if (Number.isNaN(due.getTime())) return '—';
   if (due.getTime() <= now.getTime()) return ru.word.dueNow;
   const days = studyDaysBetween(startOfStudyDay(now, dayStartsAtHour), startOfStudyDay(due, dayStartsAtHour));
-  if (days <= 0) return `сегодня, ${String(due.getHours()).padStart(2, '0')}:${String(due.getMinutes()).padStart(2, '0')}`;
-  if (days === 1) return 'завтра';
-  if (days < 30) return `через ${ru.intervals.day(days)}`;
+  if (days <= 0) return ru.dates.today(`${String(due.getHours()).padStart(2, '0')}:${String(due.getMinutes()).padStart(2, '0')}`);
+  if (days === 1) return ru.dates.tomorrow;
+  if (days < 30) return ru.dates.inDays(ru.intervals.day(days));
   return formatDate(due, now);
 }

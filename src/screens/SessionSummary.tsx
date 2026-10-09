@@ -96,7 +96,7 @@ export default function SessionSummary() {
             </div>
             <div className="flex items-center gap-2">
               <Flame aria-hidden="true" className="size-5 text-[#f59e0b]" />
-              <dt className="sr-only">streak</dt>
+              <dt className="sr-only">{ru.summary.streakLabel}</dt>
               <dd className="font-semibold">{ru.summary.streak(streak)}</dd>
             </div>
           </dl>

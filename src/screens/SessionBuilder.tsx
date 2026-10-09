@@ -61,7 +61,7 @@ const MODE_DESC: Record<TrainingMode, string> = {
 };
 
 export const SOURCE_LABELS: Record<SelectionSource, string> = {
-  selected: 'Выбранные слова',
+  selected: ru.builder.srcSelectedPlain,
   tag: ru.builder.srcTag,
   all: ru.builder.srcAll,
   hard: ru.builder.srcHard,

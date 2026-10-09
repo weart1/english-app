@@ -47,6 +47,21 @@ export const ru = {
     all: 'Все',
     search: 'Поиск',
     clear: 'Очистить',
+    of: (a: number, b: number) => `${a} из ${b}`,
+    ofShort: (b: number) => `из ${b}`,
+  },
+  dates: {
+    today: (time: string) => `сегодня, ${time}`,
+    tomorrow: 'завтра',
+    inDays: (days: string) => `через ${days}`,
+    weekdaysFull: ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'],
+    monthsGenitive: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
+  },
+  units: {
+    bytes: (n: string) => `${n} Б`,
+    kb: (n: string) => `${n} КБ`,
+    mb: (n: string) => `${n} МБ`,
+    gb: (n: string) => `${n} ГБ`,
   },
   tabs: {
     today: 'Сегодня',
@@ -292,6 +307,7 @@ export const ru = {
     title: 'Тренировка',
     source: 'Какие слова',
     srcSelected: (n: number) => `Выбранные слова (${n})`,
+    srcSelectedPlain: 'Выбранные слова',
     srcTag: 'По тегу',
     srcAll: 'Все слова',
     srcHard: 'Сложные',
@@ -385,6 +401,7 @@ export const ru = {
     slow: 'Медленнее',
     typeWhatYouHear: 'Напишите услышанное слово',
     fillBlank: 'Вставьте пропущенное слово',
+    blank: 'пропуск',
     clozeHint: (t: string) => `Подсказка: ${t}`,
     pairsTitle: 'Соедините пары',
     pairsDone: 'Все пары найдены!',
@@ -411,6 +428,7 @@ export const ru = {
     done: 'Готово',
     goal: (done: number, goal: number) => `Цель дня: ${done} / ${goal}`,
     streak: (n: number) => `Серия: ${n} ${plural(n, DAY_FORMS)}`,
+    streakLabel: 'Серия',
     practiceNote: 'Режим без влияния на расписание — интервалы не изменились.',
     minutes: (ms: number) => {
       const totalSec = Math.max(0, Math.round(ms / 1000));

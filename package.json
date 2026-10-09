@@ -13,7 +13,10 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "icons": "node scripts/generate-icons.mjs",
-    "deploy": "npm run build && npx --yes netlify-cli deploy --prod --dir=dist"
+    "deploy": "npm run build && npx --yes netlify-cli deploy --prod --dir=dist",
+    "dev:host": "vite --host",
+    "test:e2e:chromium": "PW_BROWSER=chromium playwright test",
+    "deploy:vercel": "npx --yes vercel --prod"
   },
   "dependencies": {
     "@tanstack/react-virtual": "3.14.13",
@@ -41,5 +44,8 @@
     "vite-plugin-pwa": "1.3.0",
     "vitest": "4.1.11",
     "workbox-window": "7.4.1"
+  },
+  "engines": {
+    "node": ">=20.19"
   }
 }
