@@ -4,10 +4,10 @@
  * transaction: on any error nothing changes.
  */
 import { z } from 'zod';
-import { db, DEFAULT_SETTINGS } from './schema';
+import { ALL_TABLES, db, DEFAULT_SETTINGS } from './schema';
 import { DB_SCHEMA_VERSION } from './migrations';
 import { makeCard } from './repo';
-import type { ReviewCard, ReviewLog, SessionPreset, Settings, Tag, Word } from './types';
+import type { BankMark, ReviewCard, ReviewLog, SessionPreset, Settings, Tag, Word } from './types';
 import { DIRECTIONS } from './types';
 import { localDateKey } from '@/lib/dates';
 
@@ -93,7 +93,14 @@ const settingsSchema = z.object({
   dayStartsAtHour: z.number().int().min(0).max(23),
   lastBackupAt: isoDate.optional(),
   schemaVersion: z.number().int().positive(),
+  // v2 (optional so v1 backups still restore; defaults fill them in).
+  dailyCount: z.number().int().min(0).max(50).optional(),
+  dailyLevels: z.array(z.enum(['A1', 'A2', 'B1', 'B2', 'C1'])).optional(),
+  dailyTopics: z.array(z.string()).optional(),
+  dailyKind: z.enum(['words', 'phrases', 'both']).optional(),
 });
+
+const bankMarkSchema = z.object({ id: z.string().min(1), status: z.literal('known'), at: isoDate });
 
 export const backupSchema = z.object({
   app: z.literal(BACKUP_APP),
@@ -105,6 +112,7 @@ export const backupSchema = z.object({
   logs: z.array(logSchema),
   presets: z.array(presetSchema),
   settings: settingsSchema.nullable(),
+  bankMarks: z.array(bankMarkSchema).default([]),
 });
 
 export interface Backup {
@@ -117,20 +125,22 @@ export interface Backup {
   logs: ReviewLog[];
   presets: SessionPreset[];
   settings: Settings | null;
+  bankMarks: BankMark[];
 }
 
 const byId = <T extends { id: string }>(a: T, b: T) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
 /** Snapshot of all user data (read in one transaction for consistency). */
 export async function createBackup(now = new Date()): Promise<Backup> {
-  return db.transaction('r', [db.words, db.cards, db.tags, db.logs, db.presets, db.settings], async () => {
-    const [words, cards, tags, logs, presets, settings] = await Promise.all([
+  return db.transaction('r', [db.words, db.cards, db.tags, db.logs, db.presets, db.settings, db.bankMarks], async () => {
+    const [words, cards, tags, logs, presets, settings, bankMarks] = await Promise.all([
       db.words.toArray(),
       db.cards.toArray(),
       db.tags.toArray(),
       db.logs.toArray(),
       db.presets.toArray(),
       db.settings.get('settings'),
+      db.bankMarks.toArray(),
     ]);
     return {
       app: BACKUP_APP,
@@ -143,6 +153,7 @@ export async function createBackup(now = new Date()): Promise<Backup> {
       presets: presets.sort(byId),
       // Always export the effective settings so a restore reproduces them exactly.
       settings: { ...DEFAULT_SETTINGS, ...settings, id: 'settings' },
+      bankMarks: bankMarks.sort(byId),
     };
   });
 }
@@ -216,22 +227,15 @@ export async function planRestore(backup: Backup, mode: RestoreMode): Promise<Re
 
 /** Applies a validated backup in a single transaction. */
 export async function applyRestore(backup: Backup, mode: RestoreMode): Promise<void> {
-  await db.transaction('rw', [db.words, db.cards, db.tags, db.logs, db.presets, db.settings, db.sessions], async () => {
+  await db.transaction('rw', [...ALL_TABLES()], async () => {
     if (mode === 'replace') {
-      await Promise.all([
-        db.words.clear(),
-        db.cards.clear(),
-        db.tags.clear(),
-        db.logs.clear(),
-        db.presets.clear(),
-        db.settings.clear(),
-        db.sessions.clear(),
-      ]);
+      await Promise.all(ALL_TABLES().map((t) => t.clear()));
       await db.words.bulkAdd(backup.words);
       await db.cards.bulkAdd(backup.cards);
       await db.tags.bulkAdd(backup.tags);
       await db.logs.bulkAdd(backup.logs);
       await db.presets.bulkAdd(backup.presets);
+      await db.bankMarks.bulkAdd(backup.bankMarks);
       await db.settings.put({ ...DEFAULT_SETTINGS, ...(backup.settings ?? {}), id: 'settings', schemaVersion: DB_SCHEMA_VERSION });
       return;
     }
@@ -259,5 +263,6 @@ export async function applyRestore(backup: Backup, mode: RestoreMode): Promise<v
     await db.cards.bulkPut(cardsToPut);
     await db.logs.bulkPut(backup.logs); // logs are immutable: same id = same record
     await db.presets.bulkPut(backup.presets.filter((p) => !existingPresets.has(p.id)));
+    await db.bankMarks.bulkPut(backup.bankMarks);
   });
 }

@@ -109,6 +109,16 @@ Open Библиотека → ⋯ → «Импорт».
 
 A preview lists rows that will be added, duplicates (choose skip, update, or add anyway), and errors with the reason. Nothing is written until you confirm, and the import runs as one transaction.
 
+## Words of the day and the catalog
+
+WordFlow ships with a built-in dictionary of **2,004 words and 1,007 phrases** (phrasal verbs, idioms, conversational, business and travel phrases, collocations). Every entry has a Russian translation, a CEFR level (A1–C1), a topic and usually an example sentence. It works fully offline.
+
+- **«Слова дня»** on the «Сегодня» screen offers a few new items every day. The pick stays the same all day, and it skips items you already have in the library or marked «Знаю». «Учить» adds an item to the library (with the topic as a tag), so it enters spaced repetition like any other word. «Ещё слова» gives more for today.
+- **Settings → «Слова дня»**: how many per day (0 turns it off), words, phrases or both, levels, and topics.
+- **«Каталог слов и фраз»** (Библиотека → ⋯, or «Весь каталог» on the daily card): search and filter the whole dictionary by kind, level and topic, add single items or 10 random ones.
+
+The data lives in `src/data/wordbank/` as plain text, one entry per line: `term|перевод, перевод|LEVEL|example`.
+
 ## Architecture
 
 ```
@@ -119,6 +129,7 @@ src/
   components/ GlassPanel, Button, Chip, BottomSheet, Dialog, Toaster, ProgressRing, Heatmap,
               ForecastChart, EmptyState, Toggle, Segmented, Stepper, …
   modes/      Flashcard, MultipleChoice, Typing, Listening, Cloze, MatchPairs (+ shared bodies)
+  data/       wordbank/: the built-in dictionary (lazy chunk), topics, parser
   db/         schema.ts (Dexie), migrations.ts, repo.ts (all writes), queries.ts (live reads), backup.ts
   lib/        srs, answerCheck, sessionQueue, selection, sessionPlan, modes, distractors, cloze,
               importParser, csv, dates, stats, normalize, library, format, …  (pure, unit-tested)
@@ -132,6 +143,6 @@ tests/e2e     Playwright (iPhone 13 + iPhone SE)
 - **The source of truth is IndexedDB** (Dexie, with versioned schema migrations). Zustand only holds ephemeral UI and session state.
 - **Every multi-step write is a single transaction**: adding a word with its two cards; recording an answer with its log, card update, and session progress; import; restore; delete. Components never write to Dexie directly; they go through `src/db/repo.ts`.
 - **The scheduler sits behind an interface** (`Scheduler` in `src/lib/srs.ts`), so FSRS can replace SM-2 later without touching callers.
-- **Initial JS is about 142 KB gzipped.** Route chunks are lazy and precached by the service worker. The chunk for a deep-linked route starts downloading before React renders.
+- **Initial JS is about 150 KB gzipped.** Route chunks are lazy and precached by the service worker. The chunk for a deep-linked route starts downloading before React renders.
 
 See **DECISIONS.md** for the judgement calls made where the spec was open.

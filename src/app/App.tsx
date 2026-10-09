@@ -22,6 +22,7 @@ export function App() {
               <Route path="stats" element={<Screens.Stats />} />
               <Route path="settings" element={<Screens.Settings />} />
               <Route path="import" element={<Screens.Import />} />
+              <Route path="catalog" element={<Screens.Catalog />} />
               <Route path="install" element={<Screens.InstallGuide />} />
               <Route path="session" element={<Screens.Session />} />
               <Route path="session/summary" element={<Screens.SessionSummary />} />

@@ -7,7 +7,7 @@ import type Dexie from 'dexie';
  * Note: `archived` is a boolean and IndexedDB cannot index booleans, so it is
  * filtered in memory (the library is loaded fully for search anyway).
  */
-export const DB_SCHEMA_VERSION = 1;
+export const DB_SCHEMA_VERSION = 2;
 
 export function applyMigrations(db: Dexie): void {
   db.version(1).stores({
@@ -20,8 +20,18 @@ export function applyMigrations(db: Dexie): void {
     sessions: 'id',
   });
 
-  // Example for the future:
-  // db.version(2)
-  //   .stores({ words: 'id, term, createdAt, updatedAt, *tagIds, level' })
-  //   .upgrade((tx) => tx.table('words').toCollection().modify((w) => { w.level ??= 0; }));
+  // v2: built-in dictionary ("Слова дня"). New tables only; existing data is untouched.
+  db.version(2)
+    .stores({
+      bankMarks: 'id',
+      daily: 'id',
+    })
+    .upgrade((tx) =>
+      tx
+        .table('settings')
+        .toCollection()
+        .modify((s: { schemaVersion?: number }) => {
+          s.schemaVersion = 2;
+        }),
+    );
 }

@@ -8,6 +8,7 @@ import { Chip } from '@/components/Chip';
 import { EmptyState } from '@/components/EmptyState';
 import { ProgressRing } from '@/components/ProgressRing';
 import { BackupBanner, InstallBanner } from './today/Banners';
+import { DailyWords } from './today/DailyWords';
 import { useActiveSession, useCards, useLogsSince, usePresets, useReviewDates, useSettings, useWords } from '@/db/queries';
 import { db } from '@/db/schema';
 import type { SessionConfig, SessionPreset } from '@/db/types';
@@ -142,7 +143,10 @@ export default function Today() {
   if (words && words.length === 0) {
     return (
       <Screen title={title} actions={gear}>
-        <InstallBanner />
+        <div className="flex flex-col gap-4">
+          <DailyWords now={now} />
+          <InstallBanner />
+        </div>
         <EmptyState icon={<BookPlus className="size-9" aria-hidden="true" />} title={ru.today.emptyTitle} body={ru.today.emptyBody}>
           <Button size="lg" block onClick={openNew}>
             {ru.today.emptyAction}
@@ -159,7 +163,6 @@ export default function Today() {
     <Screen title={title} actions={gear}>
       <p className="text-muted -mt-1 mb-4 px-0.5 first-letter:uppercase">{subtitle}</p>
       <div className="flex flex-col gap-4">
-
         <section className="solid-card flex items-center gap-5 p-5" aria-label={ru.today.goalAria(goalDone, settings.dailyGoal)}>
           <ProgressRing value={goalDone / Math.max(1, settings.dailyGoal)} size={112} stroke={12} label={ru.today.goalAria(goalDone, settings.dailyGoal)}>
             <span className="text-[1.45rem] leading-none font-bold tabular-nums">{goalDone}</span>
@@ -221,6 +224,8 @@ export default function Today() {
             {newCount > 0 ? ru.today.newWords(newCount) : ru.today.newWordsNone}
           </Button>
         )}
+
+        <DailyWords now={now} />
 
         {presets && presets.length > 0 && (
           <section>

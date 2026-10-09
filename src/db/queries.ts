@@ -71,3 +71,13 @@ export function useLogsSince(sinceIso: string) {
 export function useLastSession(): PersistedSession | null | undefined {
   return useLiveQuery(async () => (await db.sessions.get('last')) ?? null, []);
 }
+
+/** Ids of built-in dictionary items the user marked as known. */
+export function useBankMarks(): Set<string> | undefined {
+  return useLiveQuery(async () => new Set((await db.bankMarks.toArray()).map((m) => m.id)), []);
+}
+
+/** `null` when there is no pick for that day yet. */
+export function useDailyPick(dayKey: string) {
+  return useLiveQuery(async () => (await db.daily.get(dayKey)) ?? null, [dayKey]);
+}

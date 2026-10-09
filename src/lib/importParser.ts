@@ -15,6 +15,7 @@ export interface ImportRow {
   transcription?: string;
   examples: string[];
   tagNames: string[];
+  note?: string;
   status: ImportStatus;
   error?: string;
   /** For `duplicate`: the existing word id. */

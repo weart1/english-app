@@ -1,3 +1,5 @@
+import type { CefrLevel } from '@/data/wordbank/types';
+
 export type Direction = 'en_ru' | 'ru_en';
 
 export const DIRECTIONS: readonly Direction[] = ['en_ru', 'ru_en'] as const;
@@ -112,6 +114,26 @@ export interface Settings {
   dayStartsAtHour: number;
   lastBackupAt?: string;
   schemaVersion: number;
+  /** "Слова дня": how many items per day, which levels / topics / kinds. */
+  dailyCount: number;
+  dailyLevels: CefrLevel[];
+  /** Topic keys; empty = all topics. */
+  dailyTopics: string[];
+  dailyKind: 'words' | 'phrases' | 'both';
+}
+
+/** A built-in dictionary item the user marked as already known. */
+export interface BankMark {
+  id: string;
+  status: 'known';
+  at: string;
+}
+
+/** The "Слова дня" picked for one study day (kept stable for the whole day). */
+export interface DailyPick {
+  id: string; // YYYY-MM-DD study day
+  itemIds: string[];
+  createdAt: string;
 }
 
 /* ---------- Session engine ---------- */

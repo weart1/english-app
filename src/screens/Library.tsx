@@ -5,6 +5,7 @@ import {
   Archive,
   ArchiveRestore,
   ArrowDownUp,
+  BookOpen,
   BookPlus,
   Check,
   Dices,
@@ -351,6 +352,19 @@ export default function Library() {
             }}
           >
             {ru.library.import}
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            block
+            className="justify-start"
+            icon={<BookOpen aria-hidden="true" className="text-primary-600 size-5" />}
+            onClick={() => {
+              setMenuOpen(false);
+              navigate('/catalog');
+            }}
+          >
+            {ru.catalog.menu}
           </Button>
           <div>
             <h3 className="text-muted-glass text-caption mb-2 flex items-center gap-1.5 font-semibold tracking-wide uppercase">

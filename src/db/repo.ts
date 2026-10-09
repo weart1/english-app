@@ -3,7 +3,7 @@
  * Every multi-step write is a single Dexie transaction, so a failure never
  * leaves partial data (e.g. a word without cards, or a log without its card update).
  */
-import { db, DEFAULT_SETTINGS } from './schema';
+import { ALL_TABLES, db, DEFAULT_SETTINGS } from './schema';
 import type {
   ConcreteMode,
   Direction,
@@ -343,16 +343,8 @@ export async function deletePreset(id: string): Promise<void> {
 /* ---------- Danger zone ---------- */
 
 export async function clearAllData(): Promise<void> {
-  await db.transaction('rw', [db.words, db.cards, db.tags, db.logs, db.presets, db.settings, db.sessions], async () => {
-    await Promise.all([
-      db.words.clear(),
-      db.cards.clear(),
-      db.tags.clear(),
-      db.logs.clear(),
-      db.presets.clear(),
-      db.settings.clear(),
-      db.sessions.clear(),
-    ]);
+  await db.transaction('rw', [...ALL_TABLES()], async () => {
+    await Promise.all(ALL_TABLES().map((t) => t.clear()));
   });
 }
 
@@ -366,6 +358,7 @@ export interface ImportInputRow {
   transcription?: string;
   examples: string[];
   tagNames: string[];
+  note?: string;
   status: 'new' | 'duplicate' | 'duplicate-in-file' | 'error';
   existingId?: string;
 }
@@ -427,7 +420,7 @@ export async function importWords(
             translations: [...existing.translations, ...row.translations],
             transcription: row.transcription || existing.transcription,
             examples: [...existing.examples, ...row.examples],
-            note: existing.note,
+            note: existing.note ?? row.note,
             tagIds: [...existing.tagIds, ...tagIds],
           });
           await db.words.put({ ...existing, ...clean, updatedAt: iso });
@@ -445,4 +438,40 @@ export async function importWords(
   });
   if (wasEmpty && result.added > 0) void requestPersistentStorage();
   return result;
+}
+
+/* ---------- Built-in dictionary ("Слова дня") ---------- */
+
+/** Returns today's picks, creating them once (inside one transaction) if missing. */
+export async function ensureDailyPick(dayKey: string, compute: () => string[], now = new Date()): Promise<string[]> {
+  return db.transaction('rw', db.daily, async () => {
+    const existing = await db.daily.get(dayKey);
+    if (existing) return existing.itemIds;
+    const itemIds = compute();
+    await db.daily.put({ id: dayKey, itemIds, createdAt: now.toISOString() });
+    return itemIds;
+  });
+}
+
+/** "Ещё слова": adds more items to today's pick. */
+export async function appendDailyPick(dayKey: string, ids: readonly string[], now = new Date()): Promise<void> {
+  await db.transaction('rw', db.daily, async () => {
+    const existing = await db.daily.get(dayKey);
+    const itemIds = Array.from(new Set([...(existing?.itemIds ?? []), ...ids]));
+    await db.daily.put({ id: dayKey, itemIds, createdAt: existing?.createdAt ?? now.toISOString() });
+  });
+}
+
+export async function markBankKnown(ids: readonly string[], now = new Date()): Promise<void> {
+  const at = now.toISOString();
+  await db.bankMarks.bulkPut(ids.map((id) => ({ id, status: 'known' as const, at })));
+}
+
+export async function unmarkBankKnown(ids: readonly string[]): Promise<void> {
+  await db.bankMarks.bulkDelete(ids as string[]);
+}
+
+/** Drops a day's pick so it is generated again (after changing "Слова дня" settings). */
+export async function resetDailyPick(dayKey: string): Promise<void> {
+  await db.daily.delete(dayKey);
 }

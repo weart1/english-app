@@ -19,7 +19,12 @@ import { Toggle } from '@/components/Toggle';
 import { Dialog } from '@/components/Dialog';
 import { BottomSheet } from '@/components/BottomSheet';
 import { useSettings, useTags, useWordCount } from '@/db/queries';
-import { clearAllData, deleteTag, updateSettings, updateTag } from '@/db/repo';
+import { clearAllData, deleteTag, resetDailyPick, updateSettings, updateTag } from '@/db/repo';
+import { Chip } from '@/components/Chip';
+import { Segmented } from '@/components/Segmented';
+import { CEFR_LEVELS, type CefrLevel } from '@/data/wordbank/types';
+import { ALL_TOPICS, PHRASE_TOPICS, WORD_TOPICS } from '@/data/wordbank/topics';
+import { studyDayKey } from '@/lib/dates';
 import type { Backup, RestoreMode, RestorePlan } from '@/db/backup';
 import type { Tag } from '@/db/types';
 import { useSpeech } from '@/hooks/useSpeech';
@@ -151,6 +156,8 @@ export default function Settings() {
             {speech.supported ? '' : ru.settings.ttsUnavailable}
           </p>
         </Card>
+
+        <DailySettings />
 
         <TagsCard tags={tags ?? []} />
 
@@ -542,5 +549,79 @@ function DangerZone({ onDone }: { onDone: () => void }) {
         />
       </Dialog>
     </section>
+  );
+}
+
+/* ---------- "Слова дня" ---------- */
+
+function DailySettings() {
+  const settings = useSettings();
+  const save = (patch: Parameters<typeof updateSettings>[0]) => {
+    updateSettings(patch).catch((e: unknown) => toast.error(errorMessage(e)));
+  };
+  const toggleLevel = (l: CefrLevel) => {
+    const cur = settings.dailyLevels;
+    const next = cur.includes(l) ? cur.filter((x) => x !== l) : [...cur, l];
+    if (next.length) save({ dailyLevels: CEFR_LEVELS.filter((x) => next.includes(x)) });
+  };
+  const toggleTopic = (key: string) => {
+    const cur = settings.dailyTopics;
+    save({ dailyTopics: cur.includes(key) ? cur.filter((x) => x !== key) : [...cur, key] });
+  };
+  const topics = settings.dailyKind === 'words' ? WORD_TOPICS : settings.dailyKind === 'phrases' ? PHRASE_TOPICS : ALL_TOPICS;
+  const refresh = async () => {
+    try {
+      await resetDailyPick(studyDayKey(new Date(), settings.dayStartsAtHour));
+      toast.success(ru.daily.refreshed);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  };
+  return (
+    <Card title={ru.daily.settingsTitle}>
+      <Row label={ru.daily.settingsCount}>
+        <Stepper value={settings.dailyCount} min={0} max={20} onChange={(v) => save({ dailyCount: v })} label={ru.daily.settingsCount} />
+      </Row>
+      <div className="py-2">
+        <p className="mb-1.5 font-medium">{ru.daily.settingsKind}</p>
+        <Segmented
+          label={ru.daily.settingsKind}
+          value={settings.dailyKind}
+          onChange={(v) => save({ dailyKind: v })}
+          options={[
+            { value: 'both', label: ru.daily.kindBoth },
+            { value: 'words', label: ru.daily.kindWords },
+            { value: 'phrases', label: ru.daily.kindPhrases },
+          ]}
+        />
+      </div>
+      <div className="py-2">
+        <p className="font-medium">{ru.daily.settingsLevels}</p>
+        <p className="text-muted text-caption mb-2">{ru.daily.levelHint}</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={ru.daily.settingsLevels}>
+          {CEFR_LEVELS.map((l) => (
+            <Chip key={l} active={settings.dailyLevels.includes(l)} onClick={() => toggleLevel(l)}>
+              {l}
+            </Chip>
+          ))}
+        </div>
+      </div>
+      <div className="py-2">
+        <p className="mb-2 font-medium">{ru.daily.settingsTopics}</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={ru.daily.settingsTopics}>
+          <Chip active={settings.dailyTopics.length === 0} onClick={() => save({ dailyTopics: [] })}>
+            {ru.daily.settingsAllTopics}
+          </Chip>
+          {topics.map((t) => (
+            <Chip key={t.key} active={settings.dailyTopics.includes(t.key)} onClick={() => toggleTopic(t.key)}>
+              {t.label}
+            </Chip>
+          ))}
+        </div>
+      </div>
+      <Button variant="ghost" block onClick={() => void refresh()}>
+        {ru.daily.refresh}
+      </Button>
+    </Card>
   );
 }

@@ -114,7 +114,7 @@ Where the spec was ambiguous, I picked the option that is simplest, most robust 
 
 ## Performance
 
-- **Initial JS is about 142 KB gzipped,** against a 250 KB target.
+- **Initial JS is about 150 KB gzipped,** against a 250 KB target. The built-in dictionary (about 75 KB gzipped) is its own lazy, precached chunk.
   - Route chunks are lazy, except Today, the start screen.
   - Motion lives only in lazy chunks; each animated component brings its own `MotionConfig`.
   - zod loads only with dictionary autofill and backup restore.
@@ -125,3 +125,11 @@ Where the spec was ambiguous, I picked the option that is simplest, most robust 
   - Scrolling holds a p95 frame time of 16.8 ms.
   - Search results appear in about 280 ms, including the 150 ms debounce.
   - Planning a 2,000-word mixed session takes about 40 ms. Normalized keys are cached per word, and eligibility checks exit early.
+
+## Built-in dictionary («Слова дня»)
+
+- **A curated offline word list instead of an AI service.** It needs no API key, network or account, and the translations are reviewed rather than generated per request. The data is 2,004 words in 16 topics and 1,007 phrases in 6 topics, levelled A1–C1.
+- **Format.** Plain `term|translations|LEVEL|example` lines in TS template strings: compact, easy to edit and diff. Ids are `w:`/`p:` + the normalized term, so they stay stable across edits to translations or examples. A unit test checks the counts, unique ids, valid levels and topics, and that every example works in the cloze mode.
+- **Schema v2** adds the `bankMarks` table («Знаю» marks) and the `daily` table (one pick per study day). The migration only adds tables and settings defaults; existing data is untouched. Backups include `bankMarks`. v1 backups still restore. Daily picks are not backed up because they are regenerated.
+- **The pick is deterministic per study day** (a seeded shuffle of the filtered pool) and persisted, so it does not change on reload or after editing the library. Words and phrases are mixed about 2:1. Items already in the library (by normalized term) or marked known are skipped. Changing settings applies from the next day, or immediately with «Обновить подборку на сегодня».
+- **Adding to the library** goes through the normal import path (one transaction, duplicate check). The item's topic becomes a tag, and its level is recorded in the note.

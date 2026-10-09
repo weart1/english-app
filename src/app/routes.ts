@@ -15,6 +15,7 @@ export const loaders = {
   install: () => import('@/screens/InstallGuide'),
   session: () => import('@/screens/Session'),
   summary: () => import('@/screens/SessionSummary'),
+  catalog: () => import('@/screens/Catalog'),
 } as const;
 
 export const Screens = {
@@ -27,6 +28,7 @@ export const Screens = {
   InstallGuide: lazy(loaders.install),
   Session: lazy(loaders.session),
   SessionSummary: lazy(loaders.summary),
+  Catalog: lazy(loaders.catalog),
 };
 
 /** Kick off the chunk download for the current path (fire-and-forget). */
