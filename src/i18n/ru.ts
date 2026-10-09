@@ -115,6 +115,7 @@ export const ru = {
     resumeBody: (left: number) =>
       `У вас есть незавершённая тренировка: осталось ${left} ${plural(left, CARD_FORMS)}.`,
     resumeFinish: 'Завершить',
+    continueSession: (left: number) => `Продолжить тренировку (${left})`,
     nothingDueHint: 'Следующие повторения появятся позже',
   },
   install: {

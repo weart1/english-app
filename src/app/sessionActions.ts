@@ -2,7 +2,7 @@ import { db } from '@/db/schema';
 import { getSettings, saveActiveSession } from '@/db/repo';
 import type { SessionConfig } from '@/db/types';
 import { createSession, planSession } from '@/lib/sessionPlan';
-import { speechApiAvailable } from '@/hooks/useSpeech';
+import { speechApiAvailable, unlockSpeech } from '@/hooks/useSpeech';
 import { useSessionUi } from '@/store/session';
 import { useBuilderPrefill, useLibraryStore } from '@/store/ui';
 import { ru } from '@/i18n/ru';
@@ -14,6 +14,8 @@ export type StartResult = { ok: true } | { ok: false; reason: string };
  * Call from a tap handler, then navigate to /session.
  */
 export async function startSession(config: SessionConfig, ttsSupported = speechApiAvailable()): Promise<StartResult> {
+  // Still inside the tap that started the session: unlock iOS speech for auto-play.
+  unlockSpeech();
   const now = new Date();
   const [words, cards, settings] = await Promise.all([db.words.toArray(), db.cards.toArray(), getSettings()]);
   const plan = planSession({

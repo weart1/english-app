@@ -8,13 +8,14 @@ import { Chip } from '@/components/Chip';
 import { EmptyState } from '@/components/EmptyState';
 import { ProgressRing } from '@/components/ProgressRing';
 import { BackupBanner, InstallBanner } from './today/Banners';
-import { useCards, useLogsSince, usePresets, useReviewDates, useSettings, useWords } from '@/db/queries';
+import { useActiveSession, useCards, useLogsSince, usePresets, useReviewDates, useSettings, useWords } from '@/db/queries';
 import { db } from '@/db/schema';
 import type { SessionConfig, SessionPreset } from '@/db/types';
 import { endOfStudyDay, startOfStudyDay } from '@/lib/dates';
 import { activeDayKeys, computeStreak, wordsReviewedToday } from '@/lib/stats';
 import { errorMessage } from '@/lib/errors';
 import { useNow } from '@/hooks/useNow';
+import { unlockSpeech } from '@/hooks/useSpeech';
 import { useEditorStore } from '@/store/ui';
 import { toast } from '@/store/toast';
 import { ru } from '@/i18n/ru';
@@ -34,6 +35,7 @@ export default function Today() {
   const words = useWords();
   const cards = useCards();
   const presets = usePresets();
+  const activeSession = useActiveSession();
   const reviewDates = useReviewDates();
   const openNew = useEditorStore((s) => s.openNew);
   const [busy, setBusy] = useState(false);
@@ -82,6 +84,8 @@ export default function Today() {
 
   const run = async (config: SessionConfig) => {
     if (busy) return;
+    // Must run synchronously inside the tap (before any await) to unlock iOS speech.
+    unlockSpeech();
     setBusy(true);
     try {
       // Loaded on tap: keeps the session planner out of the first-load bundle.
@@ -169,6 +173,18 @@ export default function Today() {
             </div>
           </div>
         </section>
+
+        {activeSession && activeSession.queue.items.length > 0 && (
+          <Button
+            size="lg"
+            variant="accent"
+            block
+            onClick={() => navigate('/session')}
+            icon={<Play aria-hidden="true" className="size-5" />}
+          >
+            {ru.today.continueSession(new Set(activeSession.queue.items.map((i) => i.cardId)).size)}
+          </Button>
+        )}
 
         {counts && counts.due > 0 ? (
           <Button size="lg" block disabled={busy} onClick={() => void startReview()} icon={<Play aria-hidden="true" className="size-5" />} className="min-h-16 text-[1.15rem]">

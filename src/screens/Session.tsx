@@ -7,7 +7,7 @@ import type { PersistedSession, ReviewCard, Settings, Word } from '@/db/types';
 import { answerItems, currentItem, isFinished, progress, removeMissing, takeBatch } from '@/lib/sessionQueue';
 import { meaningsOverlap } from '@/lib/distractors';
 import { errorMessage } from '@/lib/errors';
-import { useSpeech } from '@/hooks/useSpeech';
+import { unlockSpeech, useSpeech } from '@/hooks/useSpeech';
 import { useVisualViewport } from '@/hooks/useVisualViewport';
 import { useSessionUi } from '@/store/session';
 import { toast } from '@/store/toast';
@@ -223,7 +223,10 @@ export default function Session() {
       className="fixed inset-x-0 flex flex-col"
       style={{ top: keyboardOpen ? vp.offsetTop : 0, height: keyboardOpen ? vp.height : '100%' }}
       onPointerDownCapture={() => {
-        if (!interacted) setInteracted(true);
+        if (!interacted) {
+          unlockSpeech();
+          setInteracted(true);
+        }
       }}
     >
       <header className="shrink-0 px-safe" style={{ paddingTop: 'calc(var(--safe-top) + 6px)' }}>

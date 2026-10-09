@@ -16,6 +16,25 @@ export function speechApiAvailable(): boolean {
   );
 }
 
+let unlocked = false;
+
+/**
+ * iOS only lets a page speak if the first speak() happens inside a user-gesture
+ * handler. Call this from a tap handler (e.g. "Начать"): a silent utterance
+ * unlocks speech so later automatic playback works.
+ */
+export function unlockSpeech(): void {
+  if (unlocked || !speechApiAvailable()) return;
+  unlocked = true;
+  try {
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0;
+    window.speechSynthesis.speak(u);
+  } catch {
+    unlocked = false;
+  }
+}
+
 let voicesPromise: Promise<SpeechSynthesisVoice[]> | null = null;
 let cachedVoices: SpeechSynthesisVoice[] = [];
 const listeners = new Set<(v: SpeechSynthesisVoice[]) => void>();
