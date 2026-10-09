@@ -1,0 +1,45 @@
+/* Design tokens. Raw values live here; Tailwind maps them in globals.css. */
+:root {
+  --bg-top: #f7faff;
+  --bg-bottom: #e8f0ff;
+  --blob-blue: #8db6ff;
+  --blob-yellow: #ffe08a;
+
+  --primary-500: #2f6bff;
+  --primary-600: #1f56e0;
+  --primary-100: #e3ecff;
+  --primary-50: #f1f5ff;
+  --accent-400: #ffc83d;
+  --accent-100: #fff4d1;
+  /* Text on yellow fills (AA on --accent-100). */
+  --accent-700: #8a5a00;
+
+  --text-strong: #0b1b3a;
+  --text-muted: #5b6b8c;
+  /* Muted text placed on glass: glass over the blue blob drops #5B6B8C below 4.5:1. */
+  --text-muted-glass: #4a5878;
+  --text-on-primary: #ffffff;
+
+  --success-500: #1fa971;
+  /* Filled variants that keep white text at >= 4.5:1. */
+  --success-600: #15805a;
+  --danger-500: #e5484d;
+  --danger-600: #c9363b;
+  --warning-500: #f5a524;
+
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-shadow: 0 8px 32px rgba(31, 86, 224, 0.12);
+
+  --card-shadow: 0 1px 2px rgba(11, 27, 58, 0.04), 0 4px 14px rgba(31, 86, 224, 0.07);
+
+  --radius-card: 22px;
+  --radius-button: 15px;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  --tabbar-height: 58px;
+}

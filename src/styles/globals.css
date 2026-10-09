@@ -1,0 +1,224 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@theme inline {
+  --color-bg-top: var(--bg-top);
+  --color-bg-bottom: var(--bg-bottom);
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-accent-100: var(--accent-100);
+  --color-accent-400: var(--accent-400);
+  --color-accent-700: var(--accent-700);
+  --color-strong: var(--text-strong);
+  --color-muted: var(--text-muted);
+  --color-muted-glass: var(--text-muted-glass);
+  --color-on-primary: var(--text-on-primary);
+  --color-success-500: var(--success-500);
+  --color-success-600: var(--success-600);
+  --color-danger-500: var(--danger-500);
+  --color-danger-600: var(--danger-600);
+  --color-warning-500: var(--warning-500);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', system-ui,
+    sans-serif;
+
+  /* Type scale in rem so Dynamic Type (root = -apple-system-body) scales it. 1rem = 17px by default. */
+  --text-large-title: 1.882rem;
+  --text-large-title--line-height: 1.19;
+  --text-title: 1.294rem;
+  --text-title--line-height: 1.27;
+  --text-body: 1rem;
+  --text-body--line-height: 1.41;
+  --text-caption: 0.765rem;
+  --text-caption--line-height: 1.38;
+  --text-word: 2.35rem;
+  --text-word--line-height: 1.15;
+
+  --radius-card: var(--radius-card);
+  --radius-button: var(--radius-button);
+
+  --shadow-glass: var(--glass-shadow);
+  --shadow-card: var(--card-shadow);
+
+  --animate-shake: shake 0.38s ease-in-out;
+  --animate-glow: glow 0.6s ease-out;
+  --animate-fade-in: fade-in 0.2s ease-out;
+}
+
+/* Base unit 4px for spacing (independent of Dynamic Type). */
+@theme {
+  --spacing: 4px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 0 0 rgba(31, 169, 113, 0.55); }
+  100% { box-shadow: 0 0 0 14px rgba(31, 169, 113, 0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@layer base {
+  html {
+    /* 17px root (iOS body size); on iOS this follows the Dynamic Type setting. */
+    font-size: 106.25%;
+    height: 100%;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--bg-top);
+  }
+  @supports (font: -apple-system-body) {
+    html {
+      font: -apple-system-body;
+    }
+  }
+  body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.41;
+    color: var(--text-strong);
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #root {
+    height: 100%;
+  }
+  button,
+  [role='button'],
+  a,
+  label,
+  summary {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  [role='button'] {
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: default;
+  }
+  /* Inputs: >= 16px or iOS Safari zooms on focus. */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1rem);
+    user-select: text;
+    -webkit-user-select: text;
+    color: var(--text-strong);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+  :focus-visible {
+    outline: 3px solid var(--primary-500);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  .no-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .selectable {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background: rgba(255, 255, 255, 0.92);
+    }
+  }
+
+  .solid-card {
+    background: #ffffff;
+    box-shadow: var(--card-shadow);
+    border-radius: var(--radius-card);
+  }
+
+  .scroll-area {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .app-shell {
+    height: 100%;
+    height: -webkit-fill-available;
+    height: 100svh;
+    height: 100dvh;
+  }
+
+  .pt-safe {
+    padding-top: var(--safe-top);
+  }
+  .pb-safe {
+    padding-bottom: var(--safe-bottom);
+  }
+  .px-safe {
+    padding-left: max(16px, var(--safe-left));
+    padding-right: max(16px, var(--safe-right));
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Note: Tailwind v4's `hover:` variant is already wrapped in @media (hover: hover),
+   so hover styles never "stick" after a tap on iPhone. */
+
+/* Reduced motion: movement-based feedback (shake, glow pulse, slides) becomes a plain fade. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shake,
+  .animate-glow {
+    animation: fade-in 0.2s ease-out;
+  }
+  .animate-fade-in {
+    animation: fade-in-plain 0.2s ease-out;
+  }
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
+@keyframes fade-in-plain {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
