@@ -4,7 +4,7 @@
  */
 import type { ConcreteMode, Direction, ReviewCard, TrainingMode, Word } from '@/db/types';
 import { hasCloze } from './cloze';
-import { pickDistractors } from './distractors';
+import { hasEnoughDistractors } from './distractors';
 import type { Rng } from './random';
 import { ru } from '@/i18n/ru';
 
@@ -44,7 +44,7 @@ export function modeAvailability(mode: TrainingMode, words: readonly Word[], ctx
 export function cardSupportsMode(mode: ConcreteMode, word: Word, direction: Direction, ctx: ModeContext): boolean {
   switch (mode) {
     case 'choice':
-      return pickDistractors(word, ctx.allWords, direction, () => 0.5).length >= 3;
+      return hasEnoughDistractors(word, ctx.allWords, direction, 3);
     case 'listening':
       return ctx.ttsSupported;
     case 'cloze':

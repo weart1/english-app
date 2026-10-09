@@ -11,7 +11,8 @@ const SLOP = 8;
 
 export interface LibraryRowProps {
   entry: LibraryEntry;
-  tagColors: string[];
+  /** Stable map tag id → colour (a per-row array would defeat memoization while scrolling). */
+  tagColor: ReadonlyMap<string, string>;
   selecting: boolean;
   selected: boolean;
   open: boolean;
@@ -31,7 +32,7 @@ type Mode = 'idle' | 'pending' | 'horizontal';
  */
 export const LibraryRow = memo(function LibraryRow({
   entry,
-  tagColors,
+  tagColor,
   selecting,
   selected,
   open,
@@ -42,6 +43,7 @@ export const LibraryRow = memo(function LibraryRow({
   onDelete,
 }: LibraryRowProps) {
   const { word, stats } = entry;
+  const tagColors = word.tagIds.map((id) => tagColor.get(id)).filter((c): c is string => !!c);
   const contentRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(open);
   const g = useRef({

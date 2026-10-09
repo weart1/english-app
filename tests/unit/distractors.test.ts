@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildOptions, meaningsOverlap, optionText, pickDistractors } from '@/lib/distractors';
+import { buildOptions, hasEnoughDistractors, meaningsOverlap, optionText, pickDistractors } from '@/lib/distractors';
 import { mulberry32 } from '@/lib/random';
 import { word } from './helpers';
 
@@ -35,7 +35,7 @@ describe('pickDistractors', () => {
     expect(d.map((w) => w.id)).not.toContain(elka2.id);
   });
 
-  it('never returns two distractors that are synonyms of each other', () => {
+  it('prefers distractors that are not synonyms of each other', () => {
     for (let s = 0; s < 50; s++) {
       const d = pickDistractors(cat, pool, 'ru_en', mulberry32(s));
       const hasBig = d.filter((w) => [big.id, large.id, huge.id].includes(w.id)).length;
@@ -82,5 +82,29 @@ describe('buildOptions', () => {
   it('uses translations for EN→RU and terms for RU→EN', () => {
     expect(optionText(cat, 'en_ru')).toBe('кот, кошка');
     expect(optionText(cat, 'ru_en')).toBe('cat');
+  });
+});
+
+describe('hasEnoughDistractors', () => {
+  it('agrees with pickDistractors on random pools', () => {
+    const rng = mulberry32(11);
+    const syn = ['большой', 'кот', 'дом', 'река', 'лес', 'бег'];
+    for (let round = 0; round < 60; round++) {
+      const size = 1 + Math.floor(rng() * 7);
+      const pool = Array.from({ length: size }, (_, i) =>
+        word(`t${round}-${i % 4}`, [syn[Math.floor(rng() * syn.length)] as string]),
+      );
+      const target = pool[0]!;
+      for (const dir of ['en_ru', 'ru_en'] as const) {
+        expect(hasEnoughDistractors(target, pool, dir)).toBe(pickDistractors(target, pool, dir, rng).length >= 3);
+      }
+    }
+  });
+
+  it('is fast on a 2,000-word library', () => {
+    const pool = Array.from({ length: 2000 }, (_, i) => word(`w${i}`, [`перевод ${i}`]));
+    const t = performance.now();
+    for (const w of pool) hasEnoughDistractors(w, pool, 'en_ru');
+    expect(performance.now() - t).toBeLessThan(1000);
   });
 });

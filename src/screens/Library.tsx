@@ -462,7 +462,7 @@ function LibraryList(p: LibraryListProps) {
     return (
       <LibraryRow
         entry={e}
-        tagColors={e.word.tagIds.map((id) => p.tagColor.get(id)).filter((c): c is string => !!c)}
+        tagColor={p.tagColor}
         selecting={p.selecting}
         selected={p.selected.has(e.word.id)}
         open={p.openRowId === e.word.id}

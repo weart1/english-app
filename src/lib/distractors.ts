@@ -13,15 +13,59 @@ export function optionText(word: Pick<Word, 'term' | 'translations'>, direction:
   return direction === 'en_ru' ? word.translations.slice(0, 2).join(', ') : word.term;
 }
 
-function translationKeys(word: Pick<Word, 'translations'>): Set<string> {
-  return new Set(word.translations.map((t) => searchKey(t)).filter(Boolean));
+interface WordKeys {
+  term: string;
+  translations: Set<string>;
+  option: Record<Direction, string>;
+}
+
+/**
+ * Normalized keys per word object, cached: with a 2,000-word library the
+ * distractor checks would otherwise re-normalize every word for every card.
+ * Words are immutable snapshots from Dexie, so caching by identity is safe.
+ */
+const keyCache = new WeakMap<object, WordKeys>();
+
+function keysOf(word: Pick<Word, 'term' | 'translations'>): WordKeys {
+  let k = keyCache.get(word);
+  if (!k) {
+    k = {
+      term: normalizeTerm(word.term),
+      translations: new Set(word.translations.map((t) => searchKey(t)).filter(Boolean)),
+      option: {
+        en_ru: searchKey(optionText(word, 'en_ru')),
+        ru_en: searchKey(optionText(word, 'ru_en')),
+      },
+    };
+    keyCache.set(word, k);
+  }
+  return k;
 }
 
 /** True when two words could both be correct answers for each other's prompt. */
 export function meaningsOverlap(a: Pick<Word, 'term' | 'translations'>, b: Pick<Word, 'term' | 'translations'>): boolean {
-  if (normalizeTerm(a.term) === normalizeTerm(b.term)) return true;
-  const ka = translationKeys(a);
-  for (const t of b.translations) if (ka.has(searchKey(t))) return true;
+  const ka = keysOf(a);
+  const kb = keysOf(b);
+  if (ka.term === kb.term) return true;
+  for (const t of kb.translations) if (ka.translations.has(t)) return true;
+  return false;
+}
+
+/**
+ * Fast eligibility check (early exit): at least `needed` candidates that don't
+ * overlap the target's meaning and have distinct option texts. Matches what
+ * pickDistractors can always return (its second pass relaxes the
+ * "distractors not synonyms of each other" preference).
+ */
+export function hasEnoughDistractors(target: Word, pool: readonly Word[], direction: Direction, needed = 3): boolean {
+  const texts = new Set([keysOf(target).option[direction]]);
+  for (const w of pool) {
+    if (w.id === target.id || w.translations.length === 0 || meaningsOverlap(target, w)) continue;
+    const text = keysOf(w).option[direction];
+    if (!text || texts.has(text)) continue;
+    texts.add(text);
+    if (texts.size - 1 >= needed) return true;
+  }
   return false;
 }
 
@@ -32,7 +76,7 @@ export function pickDistractors(
   rng: Rng = Math.random,
   count = 3,
 ): Word[] {
-  const targetText = searchKey(optionText(target, direction));
+  const targetText = keysOf(target).option[direction];
   const targetLen = targetText.length;
   const targetTags = new Set(target.tagIds);
 
@@ -41,7 +85,7 @@ export function pickDistractors(
     rng,
   );
   const scored = candidates.map((w) => {
-    const len = searchKey(optionText(w, direction)).length;
+    const len = keysOf(w).option[direction].length;
     const diff = Math.abs(len - targetLen);
     return {
       w,
@@ -54,14 +98,16 @@ export function pickDistractors(
 
   const out: Word[] = [];
   const seenTexts = new Set([targetText]);
-  for (const { w } of scored) {
-    if (out.length >= count) break;
-    const text = searchKey(optionText(w, direction));
-    if (!text || seenTexts.has(text)) continue;
-    // Also avoid two distractors that are synonyms of each other.
-    if (out.some((o) => meaningsOverlap(o, w))) continue;
-    seenTexts.add(text);
-    out.push(w);
+  // Pass 1 prefers distractors that are not synonyms of each other; pass 2 fills any gap.
+  for (const strict of [true, false]) {
+    for (const { w } of scored) {
+      if (out.length >= count) break;
+      const text = keysOf(w).option[direction];
+      if (!text || seenTexts.has(text)) continue;
+      if (strict && out.some((o) => meaningsOverlap(o, w))) continue;
+      seenTexts.add(text);
+      out.push(w);
+    }
   }
   return out;
 }
