@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>WordFlow — креатив 9:16</title>
+<style>
+  :root{
+    --primary:#2d68fa; --primary-600:#1f56e0; --primary-100:#e3ecff;
+    --accent:#ffc83d; --accent-100:#fff4d1; --accent-700:#8a5a00;
+    --ink:#0b1b3a; --muted:#5b6b8c; --success:#1fa971;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1920px;overflow:hidden}
+  body{font-family:"Inter",system-ui,sans-serif;color:var(--ink);
+    background:linear-gradient(180deg,#f7faff 0%,#e8f0ff 100%);position:relative}
+  .blob{position:absolute;border-radius:50%;filter:blur(90px)}
+  .b1{width:820px;height:820px;background:#8db6ff;opacity:.75;top:520px;left:-260px}
+  .b2{width:620px;height:620px;background:#ffe08a;opacity:.85;top:300px;right:-200px}
+  .b3{width:700px;height:700px;background:#8db6ff;opacity:.55;bottom:-260px;right:-180px}
+
+  .top{position:absolute;top:150px;left:0;right:0;text-align:center;padding:0 80px}
+  .brand{display:inline-flex;align-items:center;gap:18px;font-weight:800;font-size:44px;letter-spacing:-.5px}
+  .brand svg{width:76px;height:76px;filter:drop-shadow(0 8px 18px rgba(31,86,224,.35))}
+  h1{margin-top:44px;font-family:"Inter Display","Inter",sans-serif;font-weight:800;font-size:96px;line-height:1.02;letter-spacing:-3px}
+  h1 .hl{color:var(--primary);position:relative;white-space:nowrap}
+  h1 .hl::after{content:"";position:absolute;left:-6px;right:-6px;bottom:6px;height:26px;background:var(--accent);opacity:.55;z-index:-1;border-radius:8px}
+  .sub{margin-top:28px;font-size:38px;line-height:1.3;color:var(--muted);font-weight:500}
+
+  /* phone */
+  .phone{position:absolute;left:50%;top:745px;transform:translateX(-50%) rotate(-4deg) scale(.8);transform-origin:50% 0;
+    width:560px;height:1000px;border-radius:84px;background:#0b1b3a;padding:18px;
+    box-shadow:0 60px 120px rgba(31,86,224,.35),0 20px 40px rgba(11,27,58,.25)}
+  .screen{width:100%;height:100%;border-radius:68px;overflow:hidden;position:relative;
+    background:linear-gradient(180deg,#f7faff,#e8f0ff)}
+  .notch{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:150px;height:42px;border-radius:24px;background:#0b1b3a;z-index:3}
+  .screen .sb1{position:absolute;width:420px;height:420px;border-radius:50%;background:#8db6ff;filter:blur(60px);opacity:.6;top:260px;left:-140px}
+  .screen .sb2{position:absolute;width:320px;height:320px;border-radius:50%;background:#ffe08a;filter:blur(60px);opacity:.7;top:120px;right:-100px}
+  .app{position:relative;z-index:2;padding:96px 34px 0}
+  .bar{display:flex;justify-content:space-between;align-items:center;font-size:22px;font-weight:600;color:var(--muted)}
+  .progress{margin-top:16px;height:12px;border-radius:6px;background:rgba(45,104,250,.15);overflow:hidden}
+  .progress i{display:block;height:100%;width:64%;background:var(--primary);border-radius:6px}
+  .card{margin-top:40px;background:rgba(255,255,255,.72);border:2px solid rgba(255,255,255,.9);
+    border-radius:36px;padding:56px 30px 48px;text-align:center;box-shadow:0 12px 40px rgba(31,86,224,.15)}
+  .pill{display:inline-block;font-size:20px;font-weight:700;color:var(--primary-600);background:var(--primary-100);padding:8px 18px;border-radius:999px}
+  .word{margin-top:34px;font-size:64px;font-weight:800;letter-spacing:-1.5px}
+  .ipa{margin-top:10px;font-size:26px;color:var(--muted)}
+  .sep{margin:36px auto;height:2px;width:70%;background:rgba(91,107,140,.18)}
+  .tr{font-size:40px;font-weight:700;color:var(--primary-600)}
+  .ex{margin-top:20px;font-size:23px;line-height:1.4;color:var(--muted);font-style:italic}
+  .btns{margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .btn{height:84px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700}
+  .btn.no{background:#fff;color:#c9363b;border:2px solid #f3c7c9}
+  .btn.yes{background:var(--success);color:#fff;box-shadow:0 8px 20px rgba(31,169,113,.35)}
+
+  /* floating badges */
+  .badge{position:absolute;z-index:5;background:#fff;border-radius:30px;padding:22px 28px;
+    display:flex;align-items:center;gap:18px;font-size:30px;font-weight:700;
+    box-shadow:0 18px 44px rgba(31,86,224,.22)}
+  .badge .ic{width:62px;height:62px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:34px}
+  .badge small{display:block;font-size:22px;color:var(--muted);font-weight:500;margin-top:2px}
+  .bd1{top:1085px;left:34px;transform:rotate(-3deg)}
+  .bd1 .ic{background:var(--accent-100)}
+  .bd2{top:1270px;right:30px;transform:rotate(3deg)}
+  .bd2 .ic{background:var(--primary-100)}
+  .bd3{top:1430px;left:48px;transform:rotate(-2deg)}
+  .bd3 .ic{background:#dcf5ea}
+
+  .cta-wrap{position:absolute;left:0;right:0;bottom:160px;text-align:center;z-index:6}
+  .cta{display:inline-flex;align-items:center;gap:18px;background:var(--primary);color:#fff;
+    font-size:44px;font-weight:800;padding:36px 70px;border-radius:999px;
+    box-shadow:0 22px 50px rgba(45,104,250,.45);letter-spacing:-.5px}
+  .cta span{font-size:46px}
+  .note{margin-top:22px;font-size:28px;color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+  <div class="top">
+    <div class="brand">
+      <svg viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4A82FF"/><stop offset="1" stop-color="#1F56E0"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><g transform="translate(18 26) scale(0.9)"><path d="M112 156h52l40 168 46-168h44l46 168 40-168h52l-70 232h-46l-44-160-44 160h-46z" fill="#fff"/></g><path d="M414 70l12 30 30 12-30 12-12 30-12-30-30-12 30-12z" fill="#FFC83D"/></svg>
+      WordFlow
+    </div>
+    <h1>Учи английские<br>слова, которые <span class="hl">не забудешь</span></h1>
+    <p class="sub">Интервальные повторения — слово<br>всплывает ровно тогда, когда нужно</p>
+  </div>
+
+  <div class="phone"><div class="screen">
+    <div class="notch"></div><div class="sb1"></div><div class="sb2"></div>
+    <div class="app">
+      <div class="bar"><span>Карточки</span><span>16 / 25</span></div>
+      <div class="progress"><i></i></div>
+      <div class="card">
+        <span class="pill">EN → RU</span>
+        <div class="word">serendipity</div>
+        <div class="ipa">/ˌser.ənˈdɪp.ə.ti/</div>
+        <div class="sep"></div>
+        <div class="tr">счастливая случайность</div>
+        <div class="ex">“Meeting you was pure serendipity.”</div>
+      </div>
+      <div class="btns"><div class="btn no">Не помню</div><div class="btn yes">Помню ✓</div></div>
+    </div>
+  </div></div>
+
+  <div class="badge bd1"><div class="ic">🎯</div><div>7 режимов<small>карточки, пары, аудио…</small></div></div>
+  <div class="badge bd2"><div class="ic">✈️</div><div>Офлайн<small>учи где угодно</small></div></div>
+  <div class="badge bd3"><div class="ic">📚</div><div>Свой словарь<small>теги и импорт из CSV</small></div></div>
+
+  <div class="cta-wrap">
+    <div class="cta">Начать учить <span>→</span></div>
+    <div class="note">Без регистрации · прямо в браузере iPhone</div>
+  </div>
+</body>
+</html>
